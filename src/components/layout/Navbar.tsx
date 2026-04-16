@@ -33,7 +33,7 @@ export default function Navbar() {
           : "top-10"
       }`}
       style={{
-        backgroundColor: "var(--color-cream)",
+        backgroundColor: scrolled ? "var(--color-cream)" : "transparent",
         borderColor: scrolled ? "var(--color-border)" : "transparent",
         backdropFilter: scrolled ? "blur(12px)" : "none",
       }}
@@ -49,12 +49,14 @@ export default function Navbar() {
               fill
               sizes="40px"
               priority
-              className="object-contain"
+              className={`object-contain transition-all duration-300 ${
+                scrolled ? "" : "brightness-0 invert"
+              }`}
             />
           </div>
           <span
-            className="ml-2 font-serif text-lg font-medium tracking-tight"
-            style={{ color: "var(--color-primary)" }}
+            className="ml-2 font-serif text-lg font-medium tracking-tight transition-colors duration-300"
+            style={{ color: scrolled ? "var(--color-primary)" : "#F5EBDC" }}
           >
             Exilus
           </span>
@@ -66,19 +68,27 @@ export default function Navbar() {
             <a
               key={l.href}
               href={l.href}
-              className="relative text-sm font-medium transition-colors group"
-              style={{ color: "var(--color-warm-text)" }}
+              className="relative text-sm font-medium transition-colors duration-300 group"
+              style={{
+                color: scrolled
+                  ? "var(--color-warm-text)"
+                  : "rgba(245,235,220,0.85)",
+              }}
             >
               {l.label}
               {/* Underline animado */}
               <span
                 className="absolute -bottom-0.5 left-0 h-px w-0 group-hover:w-full transition-all duration-300"
-                style={{ backgroundColor: "var(--color-primary)" }}
+                style={{
+                  backgroundColor: scrolled
+                    ? "var(--color-primary)"
+                    : "#F5EBDC",
+                }}
               />
             </a>
           ))}
 
-          {/* CTA verde */}
+          {/* CTA verde — stays green on both backgrounds */}
           <motion.a
             href={CLIENT.booking}
             target="_blank"
@@ -102,15 +112,19 @@ export default function Navbar() {
         <button
           type="button"
           onClick={() => setOpen(!open)}
-          className="md:hidden p-2 rounded-lg transition-colors hover:bg-primary/5"
+          className="md:hidden p-2 rounded-lg transition-colors"
           aria-label={open ? "Cerrar menú" : "Abrir menú"}
-          style={{ color: "var(--color-primary)" }}
+          style={{
+            color: scrolled || open
+              ? "var(--color-primary)"
+              : "#F5EBDC",
+          }}
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu — always cream solid */}
       <AnimatePresence>
         {open && (
           <motion.div
