@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+@theme {
+  /* === BRAND EXILUS — Cirugía Bariátrica v2 Editorial Wine-Medical === */
+
+  /* Primary — morado vino */
+  --color-primary: #6C1D45;
+  --color-primary-dark: #612C51;
+  --color-primary-foreground: #F5EBDC;
+
+  /* Accent — lilac suave */
+  --color-lilac: #DFD0F1;
+
+  /* CTA — verde exclusivo para botón principal */
+  --color-cta: #78D64B;
+  --color-cta-foreground: #1a3a0a;
+  --color-cta-soft: #B7F6C2;
+
+  /* Cream — fondo dominante */
+  --color-cream: #F5EBDC;
+
+  /* Rose wine — acento sobrio para stats / números */
+  --color-accent: #9B3A5C;
+
+  /* Text warm — cuerpo sobre crema (más cálido que negro puro) */
+  --color-warm-text: #4A3728;
+
+  /* Neutrals */
+  --color-background: #F5EBDC;
+  --color-foreground: #6C1D45;
+  --color-card: #FDF7F0;
+  --color-card-foreground: #4A3728;
+  --color-muted: #F0E4D2;
+  --color-muted-foreground: #7A5C4A;
+  --color-border: #E8D8C8;
+  --color-ring: #6C1D45;
+
+  /* Radii */
+  --radius-lg: 1rem;
+  --radius-md: 0.75rem;
+  --radius-sm: 0.5rem;
+
+  /* Fonts — se inyectan desde layout.tsx */
+  --font-serif: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    position: relative;
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+  }
+
+  body {
+    position: relative;
+    background-color: var(--color-cream);
+    color: var(--color-warm-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-serif);
+  }
+
+  /* Selección de texto — marca */
+  ::selection {
+    background-color: #DFD0F1;
+    color: #6C1D45;
+  }
+}
+
+/* Utilitarios globales */
+@layer utilities {
+  .font-serif {
+    font-family: var(--font-serif);
+  }
+  .font-sans {
+    font-family: var(--font-sans);
+  }
+  /* Secciones invertidas — fondo morado */
+  .section-inverted {
+    background-color: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+}
+
+/* Marquee infinite scroll */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
