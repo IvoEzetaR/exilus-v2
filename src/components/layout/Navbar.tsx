@@ -27,10 +27,8 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed left-0 right-0 z-40 transition-all duration-300 ${
-        scrolled
-          ? "top-0 shadow-sm border-b"
-          : "top-10"
+      className={`fixed left-0 right-0 z-40 top-10 transition-all duration-300 ${
+        scrolled ? "shadow-sm border-b" : ""
       }`}
       style={{
         backgroundColor: scrolled ? "var(--color-cream)" : "transparent",
@@ -49,9 +47,7 @@ export default function Navbar() {
               fill
               sizes="40px"
               priority
-              className={`object-contain transition-all duration-300 ${
-                scrolled ? "" : "brightness-0 invert"
-              }`}
+              className="object-contain"
             />
           </div>
           <span

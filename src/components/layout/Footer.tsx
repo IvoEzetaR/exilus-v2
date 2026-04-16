@@ -40,7 +40,7 @@ export default function Footer() {
                   alt="Exilus — Cirugía Bariátrica Trujillo"
                   fill
                   sizes="56px"
-                  className="object-contain brightness-0 invert"
+                  className="object-contain"
                 />
               </div>
               <span
