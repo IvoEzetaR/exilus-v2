@@ -1,6 +1,8 @@
 import { Phone, Mail, MapPin } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { CLIENT } from "@/lib/client-data";
+import { SERVICES } from "@/lib/services-data";
 
 const IconInstagram = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
@@ -29,7 +31,7 @@ export default function Footer() {
       aria-label="Pie de página"
     >
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
 
           {/* Brand */}
           <div>
@@ -124,6 +126,38 @@ export default function Footer() {
                   Trujillo, Perú
                 </span>
               </div>
+            </div>
+          </div>
+
+          {/* Especialidades */}
+          <div>
+            <h4
+              className="font-sans text-xs font-semibold tracking-[0.15em] uppercase mb-5"
+              style={{ color: "var(--color-cream)" }}
+            >
+              Especialidades
+            </h4>
+            <div className="space-y-2.5">
+              {SERVICES.map((service) => (
+                <Link
+                  key={service.slug}
+                  href={`/servicios/${service.slug}`}
+                  className="block text-sm transition-opacity hover:opacity-80"
+                  style={{ color: "rgba(245,235,220,0.65)" }}
+                >
+                  {service.name}
+                </Link>
+              ))}
+              <Link
+                href="/servicios"
+                className="block text-sm font-semibold transition-opacity hover:opacity-80 mt-3 pt-3"
+                style={{
+                  color: "rgba(245,235,220,0.85)",
+                  borderTop: "1px solid rgba(245,235,220,0.10)",
+                }}
+              >
+                Todos los servicios →
+              </Link>
             </div>
           </div>
 

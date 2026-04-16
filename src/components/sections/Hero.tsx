@@ -46,7 +46,7 @@ export default function Hero() {
         className="absolute inset-0 z-0"
       >
         <Image
-          src="/images/doctor-terno.jpg"
+          src="/images/doctor-quirofano.jpg"
           alt="Dr. Víctor Augusto Salazar Tantaleán, cirujano bariatra en Trujillo"
           fill
           priority

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { CLIENT } from "@/lib/client-data";
+import Link from "next/link";
 import {
   staggerContainer,
   staggerItem,
@@ -15,6 +15,7 @@ const services = [
   {
     number: "01",
     tag: "Bariátrica",
+    slug: "cirugia-bariatrica-metabolica",
     title: "Cirugía Bariátrica y Metabólica",
     description:
       "Procedimientos quirúrgicos avanzados para el tratamiento de la obesidad y enfermedades metabólicas asociadas.",
@@ -31,6 +32,7 @@ const services = [
   {
     number: "02",
     tag: "Obesidad",
+    slug: "manejo-integral-obesidad",
     title: "Manejo Integral del Sobrepeso y Obesidad",
     description:
       "Abordaje multidisciplinario personalizado que integra evaluación médica, nutricional y psicológica.",
@@ -47,6 +49,7 @@ const services = [
   {
     number: "03",
     tag: "Laparoscópica",
+    slug: "cirugia-laparoscopica-avanzada",
     title: "Cirugía Laparoscópica Avanzada",
     description:
       "Técnicas mínimamente invasivas que reducen riesgos y aceleran la recuperación postoperatoria.",
@@ -63,6 +66,7 @@ const services = [
   {
     number: "04",
     tag: "Digestiva",
+    slug: "cirugia-digestiva",
     title: "Cirugía Digestiva Especializada",
     description:
       "Tratamiento de enfermedades del sistema digestivo con tecnología de última generación.",
@@ -79,6 +83,7 @@ const services = [
   {
     number: "05",
     tag: "Proctología",
+    slug: "proctologia",
     title: "Proctología y Cirugía Anorrectal",
     description:
       "Diagnóstico y tratamiento especializado de enfermedades del colon, recto y ano.",
@@ -97,9 +102,10 @@ const services = [
 /* ─── Glassmorphism Card ─── */
 function GlassCard({ s }: { s: (typeof services)[0] }) {
   return (
+    <Link href={`/servicios/${s.slug}`} className="group block">
     <motion.article
       variants={staggerItem}
-      className="group relative overflow-hidden rounded-2xl sm:rounded-[28px] min-h-[360px] sm:min-h-[420px] lg:min-h-[500px] cursor-default flex flex-col justify-end"
+      className="group relative overflow-hidden rounded-2xl sm:rounded-[28px] min-h-[360px] sm:min-h-[420px] lg:min-h-[500px] flex flex-col justify-end"
     >
       {/* Background image with zoom on hover */}
       <div className="absolute inset-0 overflow-hidden rounded-[28px]">
@@ -194,24 +200,16 @@ function GlassCard({ s }: { s: (typeof services)[0] }) {
           </p>
 
           {/* CTA */}
-          <a
-            href={CLIENT.booking}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-[13px] font-semibold text-white transition-all duration-300 hover:gap-3"
-            aria-label={`Agenda tu evaluación para ${s.title}`}
+          <span
+            className="inline-flex items-center gap-2 text-[13px] font-semibold text-white transition-all duration-300 group-hover:gap-3"
+            aria-label={`Conocer más sobre ${s.title}`}
           >
-            Agenda tu evaluación
-            <span
-              aria-hidden="true"
-              className="transition-transform duration-300 group-hover:translate-x-1"
-            >
-              →
-            </span>
-          </a>
+            Conocer más →
+          </span>
         </div>
       </div>
     </motion.article>
+    </Link>
   );
 }
 
