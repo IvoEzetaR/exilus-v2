@@ -147,3 +147,22 @@ export const springTransition: Transition = {
   stiffness: 400,
   damping: 25,
 };
+
+// ─── imageSwap — cross-fade editorial para AnimatePresence mode="wait" ────
+// Uso: imagen del paso activo en el split-sticky de ProcessJourney
+export const imageSwap: Variants = {
+  enter: {
+    opacity: 0,
+    scale: 1.04,
+  },
+  center: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.7, ease: EASE_OUT_EXPO },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.98,
+    transition: { duration: 0.35, ease: [0.4, 0, 1, 1] },
+  },
+};

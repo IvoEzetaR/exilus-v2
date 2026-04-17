@@ -1,8 +1,16 @@
 "use client";
 
-import { motion } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useTransform,
+  useReducedMotion,
+} from "framer-motion";
 import { Calendar, Activity, HeartPulse } from "lucide-react";
 import Image from "next/image";
+import { useRef, useState, useEffect, useCallback } from "react";
+import { useInView } from "framer-motion";
 import { CLIENT } from "@/lib/client-data";
 import {
   staggerContainer,
@@ -11,6 +19,8 @@ import {
   fadeInRight,
   scaleOnHover,
   VIEWPORT_ONCE,
+  imageSwap,
+  EASE_OUT_EXPO,
 } from "@/lib/design-system";
 
 const pillars = [
@@ -309,136 +319,404 @@ export default function Method() {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
-          Bloque 2 — Tu proceso, paso a paso (zigzag timeline con imágenes)
-          Diseño: cards con imagen alternando izquierda/derecha, línea
-          vertical central con números circulares.
+          Bloque 2 — Ruta orgánica split-sticky editorial
+          Diseño: split-screen sticky desktop, curva S SVG con pathLength
+          scroll-driven, tarjetas glass con outline numbers XL, hover dim.
           ═══════════════════════════════════════════════════════════════ */}
-      <div
-        className="px-4 sm:px-6 lg:px-8 py-12 sm:py-14 lg:py-16"
-        style={{ backgroundColor: "var(--color-cream)" }}
-      >
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <motion.div
-            variants={fadeInUp}
-            initial="hidden"
-            whileInView="show"
-            viewport={VIEWPORT_ONCE}
-            className="text-center mb-8"
+      <ProcessJourney />
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   ProcessJourney — Bloque 2 refactorizado
+   Extrae toda la lógica para mantener Method() limpio.
+──────────────────────────────────────────────────────────────────────────────*/
+
+/* Clip-path blob orgánico — SVG viewBox 100×100 */
+const BLOB_CLIP =
+  "polygon(8% 0%, 92% 3%, 100% 14%, 97% 82%, 88% 100%, 12% 97%, 0% 86%, 3% 18%)";
+
+/* Step dot positions en el SVG 100-wide × 520-tall (5 puntos equidistantes) */
+const DOT_Y = [52, 152, 252, 352, 452];
+
+/* La curva S que conecta los 5 dots — path relativo en viewBox "0 0 100 520" */
+const S_PATH =
+  "M 50 52 C 80 100, 20 140, 50 152 C 80 164, 80 228, 50 252 C 20 276, 20 328, 50 352 C 80 376, 80 428, 50 452";
+
+/* ── StepTrigger — detecta cuándo una tarjeta entra al viewport ── */
+function StepTrigger({
+  index,
+  onActivate,
+  children,
+}: {
+  index: number;
+  onActivate: (i: number) => void;
+  children: React.ReactNode;
+}) {
+  const ref = useRef<HTMLLIElement>(null);
+  const isInView = useInView(ref, { amount: 0.55 });
+
+  // useEffect para evitar setState durante render (React warning)
+  useEffect(() => {
+    if (isInView) onActivate(index);
+  }, [isInView, index, onActivate]);
+
+  return <li ref={ref}>{children}</li>;
+}
+
+/* ── ProcessJourney — componente principal del Bloque 2 ── */
+function ProcessJourney() {
+  const shouldReduce = useReducedMotion();
+  const [activeStep, setActiveStep] = useState(0);
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+
+  /* Estable para pasar a StepTrigger sin re-crear en cada render */
+  const handleActivate = useCallback((i: number) => setActiveStep(i), []);
+
+  /* Referencia a la sección para scroll tracking */
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start 80%", "end 20%"],
+  });
+
+  /* pathLength crece de 0 a 1 al scrollear dentro de la sección */
+  const pathLength = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
+  return (
+    <div
+      ref={sectionRef}
+      className="px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24"
+      style={{ backgroundColor: "var(--color-cream)" }}
+    >
+      <div className="max-w-7xl mx-auto">
+
+        {/* ── Header ── */}
+        <motion.div
+          variants={fadeInUp}
+          initial="hidden"
+          whileInView="show"
+          viewport={VIEWPORT_ONCE}
+          className="text-center mb-16 lg:mb-20"
+        >
+          <p
+            className="font-sans text-xs font-semibold tracking-[0.15em] uppercase mb-3"
+            style={{ color: "rgba(108,29,69,0.55)" }}
           >
-            <h2
-              className="font-serif text-3xl sm:text-4xl font-light leading-tight"
-              style={{ color: "var(--color-primary)" }}
-            >
-              Tu proceso, paso a paso
-            </h2>
-            <p
-              className="mt-3 text-sm sm:text-base max-w-xl mx-auto leading-relaxed"
-              style={{ color: "var(--color-warm-text)" }}
-            >
-              Desde la primera consulta hasta tu seguimiento a largo plazo, cada etapa está
-              pensada para que te sientas acompañado y seguro.
-            </p>
-          </motion.div>
+            Paso a paso
+          </p>
+          <h2
+            className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light leading-tight"
+            style={{ color: "var(--color-primary)" }}
+          >
+            Tu proceso, paso a paso
+          </h2>
+          <p
+            className="mt-4 text-sm sm:text-base max-w-xl mx-auto leading-relaxed"
+            style={{ color: "var(--color-warm-text)" }}
+          >
+            Desde la primera consulta hasta tu seguimiento a largo plazo, cada etapa está
+            pensada para que te sientas acompañado y seguro.
+          </p>
+        </motion.div>
 
-          {/* ── Timeline zigzag — all breakpoints ── */}
+        {/* ── Layout split: columna izquierda sticky + columna derecha scroll ── */}
+        <div className="lg:grid lg:grid-cols-2 lg:gap-16 xl:gap-24 items-start">
+
+          {/* ── COLUMNA IZQUIERDA — imagen sticky (solo desktop) ── */}
+          <div className="hidden lg:block lg:sticky lg:top-28 self-start">
+            <div className="relative w-full aspect-[4/5] overflow-hidden"
+              style={{ clipPath: BLOB_CLIP }}
+            >
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeStep}
+                  variants={shouldReduce ? undefined : imageSwap}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  className="absolute inset-0"
+                >
+                  <Image
+                    src={steps[activeStep].image ?? "/images/paso-evaluacion-inicial.jpg"}
+                    alt={steps[activeStep].title}
+                    fill
+                    sizes="50vw"
+                    className="object-cover"
+                    priority={activeStep === 0}
+                  />
+                  {/* Subtle vino overlay para unidad editorial */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgba(108,29,69,0.12) 0%, transparent 60%)",
+                    }}
+                  />
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Step counter badge — float sobre imagen */}
+              <div
+                className="absolute bottom-6 left-6 z-10 flex items-center gap-2 rounded-full px-4 py-2"
+                style={{
+                  backgroundColor: "rgba(245,235,220,0.85)",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  border: "1px solid rgba(108,29,69,0.15)",
+                }}
+              >
+                <span
+                  className="font-serif text-lg font-light tabular-nums"
+                  style={{ color: "var(--color-primary)" }}
+                >
+                  {String(activeStep + 1).padStart(2, "0")}
+                </span>
+                <span className="font-sans text-xs" style={{ color: "var(--color-warm-text)" }}>
+                  / 05
+                </span>
+                <span
+                  className="font-sans text-xs font-medium ml-1"
+                  style={{ color: "var(--color-primary)" }}
+                >
+                  {steps[activeStep].title}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* ── COLUMNA DERECHA — tarjetas + curva S ── */}
           <div className="relative">
-            {/* Línea vertical central */}
+
+            {/* ── Curva S SVG — visible en todas las resoluciones ── */}
             <div
-              className="absolute left-1/2 -translate-x-px top-0 bottom-0 w-[2px]"
-              style={{ backgroundColor: "var(--color-border)" }}
+              className="absolute top-0 bottom-0 w-16 pointer-events-none select-none"
+              style={{
+                /* Mobile: a la izquierda; desktop: centrado entre cards */
+                left: "0",
+              }}
               aria-hidden="true"
-            />
-
-            {/* Steps */}
-            <motion.ol
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="show"
-              viewport={VIEWPORT_ONCE}
-              className="space-y-1 sm:space-y-1.5 lg:space-y-2"
-              aria-label="Pasos del proceso"
             >
-              {steps.map((s, idx) => {
-                const isLeft = idx % 2 === 0;
-                const isLast = idx === steps.length - 1;
-                const isStep4 = idx === 3;
+              <svg
+                viewBox="0 0 100 520"
+                preserveAspectRatio="none"
+                className="w-full h-full"
+                aria-hidden="true"
+              >
+                <defs>
+                  <linearGradient id="stepGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#6C1D45" />
+                    <stop offset="100%" stopColor="#DFD0F1" />
+                  </linearGradient>
+                </defs>
 
-                return (
-                  <motion.li
-                    key={s.step}
-                    variants={staggerItem}
-                    className="relative"
+                {/* Track (line estática background) */}
+                <path
+                  d={S_PATH}
+                  stroke="rgba(108,29,69,0.12)"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeLinecap="round"
+                />
+
+                {/* Línea animada con pathLength */}
+                {!shouldReduce && (
+                  <motion.path
+                    d={S_PATH}
+                    stroke="url(#stepGradient)"
+                    strokeWidth="2.5"
+                    fill="none"
+                    strokeLinecap="round"
+                    style={{ pathLength }}
+                  />
+                )}
+                {shouldReduce && (
+                  <path
+                    d={S_PATH}
+                    stroke="url(#stepGradient)"
+                    strokeWidth="2.5"
+                    fill="none"
+                    strokeLinecap="round"
+                  />
+                )}
+
+                {/* Step dots — CSS transition para compatibilidad SVG */}
+                {DOT_Y.map((cy, i) => (
+                  <circle
+                    key={i}
+                    cx="50"
+                    cy={cy}
+                    r={activeStep === i ? 10 : 6}
+                    fill={activeStep === i ? "#6C1D45" : "#F5EBDC"}
+                    stroke={activeStep === i ? "#6C1D45" : "rgba(108,29,69,0.35)"}
+                    strokeWidth="1.5"
+                    style={{
+                      transition: shouldReduce
+                        ? "none"
+                        : "r 0.35s cubic-bezier(0.22,1,0.36,1), fill 0.35s cubic-bezier(0.22,1,0.36,1)",
+                    }}
+                  />
+                ))}
+              </svg>
+            </div>
+
+            {/* ── Lista de tarjetas ── */}
+            <ol
+              aria-label="Pasos del proceso"
+              className="space-y-6 pl-20 lg:pl-20"
+            >
+              {steps.map((s, idx) => (
+                <StepTrigger key={s.step} index={idx} onActivate={handleActivate}>
+
+                  {/* ── Glass card + outline number ── */}
+                  <motion.div
+                    onHoverStart={() => setHoveredCard(idx)}
+                    onHoverEnd={() => setHoveredCard(null)}
+                    animate={
+                      shouldReduce
+                        ? undefined
+                        : hoveredCard !== null && hoveredCard !== idx
+                        ? { opacity: 0.35, filter: "saturate(0.85)" }
+                        : { opacity: 1, filter: "saturate(1)" }
+                    }
+                    whileHover={shouldReduce ? undefined : { scale: 1.02 }}
+                    transition={{ duration: 0.35, ease: EASE_OUT_EXPO }}
+                    className="relative overflow-hidden rounded-[1.25rem] cursor-default"
+                    style={{
+                      backgroundColor: "rgba(255,255,255,0.55)",
+                      backdropFilter: "blur(16px) saturate(170%)",
+                      WebkitBackdropFilter: "blur(16px) saturate(170%)",
+                      border: "1px solid rgba(108,29,69,0.12)",
+                      boxShadow:
+                        "inset 0 1px 0 rgba(255,255,255,0.5), 0 4px 24px rgba(108,29,69,0.06)",
+                    }}
                   >
-                    <div className="grid grid-cols-[1fr_24px_1fr] sm:grid-cols-[1fr_32px_1fr] lg:grid-cols-[1fr_40px_1fr] gap-1.5 sm:gap-2.5 lg:gap-4 items-start">
-                      {/* Left column */}
-                      <div>
-                        {isLeft ? (
-                          isLast ? (
-                            <Step5Card s={s} />
-                          ) : (
-                            <StepCard s={s} accent={isStep4} />
-                          )
-                        ) : (
-                          <div />
-                        )}
-                      </div>
+                    {/* Outline number XL — absolute behind title */}
+                    <span
+                      aria-hidden="true"
+                      className="absolute font-serif select-none pointer-events-none"
+                      style={{
+                        top: "-0.5rem",
+                        left: "1rem",
+                        fontSize: "clamp(7rem, 12vw, 11rem)",
+                        lineHeight: 0.85,
+                        fontWeight: 400,
+                        color: "transparent",
+                        WebkitTextStroke: "1.5px var(--color-primary)",
+                        opacity: 0.22,
+                        zIndex: 0,
+                      }}
+                    >
+                      {String(idx + 1).padStart(2, "0")}
+                    </span>
 
-                      {/* Center — number circle */}
-                      <div className="flex justify-center pt-3 sm:pt-4 lg:pt-6">
+                    <div className="relative z-10 p-6 sm:p-8">
+                      {/* Mobile-only image (aspect 4/3) con clip orgánico */}
+                      {s.image && (
                         <div
-                          className="relative z-10 flex h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10 flex-shrink-0 items-center justify-center rounded-full border-[1.5px] sm:border-2 text-[9px] sm:text-[11px] lg:text-xs font-bold"
+                          className="lg:hidden relative w-full mb-5 overflow-hidden"
                           style={{
-                            backgroundColor: "var(--color-cream)",
-                            borderColor: "var(--color-primary)",
-                            color: "var(--color-primary)",
+                            aspectRatio: "4/3",
+                            clipPath: BLOB_CLIP,
                           }}
                         >
-                          {s.step}
+                          <Image
+                            src={s.image}
+                            alt={s.title}
+                            fill
+                            sizes="(max-width: 768px) 90vw, 50vw"
+                            className="object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
+
+                      {/* Header: título + línea quirúrgica */}
+                      <div className="mb-3">
+                        <h3
+                          className="font-serif text-2xl lg:text-3xl font-light leading-snug"
+                          style={{ color: "var(--color-primary)" }}
+                        >
+                          {s.title}
+                        </h3>
+                        {/* Línea quirúrgica + punto de enfoque */}
+                        <div className="flex items-center gap-2 mt-2">
+                          <div
+                            className="h-px w-12 flex-shrink-0"
+                            style={{ backgroundColor: "var(--color-primary)" }}
+                          />
+                          <div
+                            className="h-1 w-1 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: "var(--color-lilac)" }}
+                          />
                         </div>
                       </div>
 
-                      {/* Right column */}
-                      <div>
-                        {!isLeft ? (
-                          <StepCard s={s} accent={isStep4} />
-                        ) : (
-                          <div />
-                        )}
-                      </div>
-                    </div>
-                  </motion.li>
-                );
-              })}
-            </motion.ol>
-          </div>
+                      {/* Cuerpo */}
+                      <p
+                        className="font-sans text-sm leading-relaxed"
+                        style={{ color: "var(--color-warm-text)" }}
+                      >
+                        {s.description}
+                      </p>
 
-          {/* CTA */}
-          <motion.div
-            variants={fadeInUp}
-            initial="hidden"
-            whileInView="show"
-            viewport={VIEWPORT_ONCE}
-            className="mt-10 text-center"
-          >
-            <motion.a
-              href={CLIENT.booking}
-              target="_blank"
-              rel="noopener noreferrer"
-              {...scaleOnHover}
-              className="inline-flex items-center gap-2 rounded-xl px-8 py-4 text-base font-semibold"
-              style={{
-                backgroundColor: "var(--color-cta)",
-                color: "#1a3a0a",
-                boxShadow: "0 8px 24px rgba(120,214,75,0.28)",
-              }}
-            >
-              <Calendar className="h-5 w-5" aria-hidden="true" />
-              Iniciar evaluación
-            </motion.a>
-          </motion.div>
+                      {/* Paso 5 — iconos extra (seguimiento) */}
+                      {idx === 4 && (
+                        <div className="flex gap-2 mt-4">
+                          <div
+                            className="flex h-7 w-7 items-center justify-center rounded-lg"
+                            style={{ backgroundColor: "var(--color-lilac)" }}
+                          >
+                            <Activity
+                              className="h-3.5 w-3.5"
+                              style={{ color: "var(--color-primary)" }}
+                            />
+                          </div>
+                          <div
+                            className="flex h-7 w-7 items-center justify-center rounded-lg"
+                            style={{ backgroundColor: "var(--color-lilac)" }}
+                          >
+                            <HeartPulse
+                              className="h-3.5 w-3.5"
+                              style={{ color: "var(--color-primary)" }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                </StepTrigger>
+              ))}
+            </ol>
+          </div>
         </div>
+
+        {/* ── CTA ── */}
+        <motion.div
+          variants={fadeInUp}
+          initial="hidden"
+          whileInView="show"
+          viewport={VIEWPORT_ONCE}
+          className="mt-16 text-center"
+        >
+          <motion.a
+            href={CLIENT.booking}
+            target="_blank"
+            rel="noopener noreferrer"
+            {...scaleOnHover}
+            className="inline-flex items-center gap-2 rounded-xl px-8 py-4 text-base font-semibold"
+            style={{
+              backgroundColor: "var(--color-cta)",
+              color: "#1a3a0a",
+              boxShadow: "0 8px 24px rgba(120,214,75,0.28)",
+            }}
+          >
+            <Calendar className="h-5 w-5" aria-hidden="true" />
+            Iniciar evaluación
+          </motion.a>
+        </motion.div>
       </div>
-    </section>
+    </div>
   );
 }
