@@ -1,3 +1,34 @@
+# Hero Redesign — Cream Split Editorial
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Reemplazar el hero fullbleed oscuro por un layout cream split editorial que en mobile muestra al doctor inmediatamente (foto arriba, contenido abajo) con animación kinetic de headline tipo Awwwards.
+
+**Architecture:** Componente Hero.tsx reescrito con dos layouts: mobile (foto 50vh tope + contenido crema) y desktop (grid 55/45 — texto izquierda, foto derecha con rounded-l). Las animaciones usan delays explícitos en lugar de staggerContainer anidado, garantizando orden preciso. Credential card y badge visibles en ambos breakpoints.
+
+**Tech Stack:** Next.js 15, Framer Motion 12, Tailwind CSS v4, TypeScript
+
+---
+
+## Files
+
+| Acción | Archivo |
+|--------|---------|
+| Modify | `src/components/sections/Hero.tsx` |
+| No cambios | `src/lib/design-system.ts`, `src/app/globals.css`, resto de secciones |
+
+---
+
+### Task 1: Reescribir Hero.tsx con cream split layout
+
+**Files:**
+- Modify: `src/components/sections/Hero.tsx`
+
+- [ ] **Step 1: Reemplazar el contenido completo de Hero.tsx**
+
+Reemplazar todo el archivo con:
+
+```tsx
 "use client";
 
 import { useRef } from "react";
@@ -475,3 +506,122 @@ export default function Hero() {
     </section>
   );
 }
+```
+
+- [ ] **Step 2: Verificar que TypeScript compila**
+
+```bash
+cd /c/Users/danie/OneDrive/Escritorio/WEBS/exilus/v2-hero-fullbleed
+npm run build 2>&1 | tail -20
+```
+
+Esperado: sin errores de tipo. Si hay error de `EASE_OUT_EXPO` no exportado, verificar que `src/lib/design-system.ts` lo exporta (ya lo hace en la línea 9).
+
+---
+
+### Task 2: Verificación visual en dev server
+
+**Files:**
+- No cambios de código
+
+- [ ] **Step 1: Iniciar dev server**
+
+```bash
+cd /c/Users/danie/OneDrive/Escritorio/WEBS/exilus/v2-hero-fullbleed
+npm run dev
+```
+
+- [ ] **Step 2: Verificar mobile (375px)**
+
+Abrir http://localhost:3000 en Chrome DevTools → toggle device toolbar → iPhone SE (375px).
+
+Checklist mobile:
+- [ ] Foto del doctor visible inmediatamente al cargar (no hay que scrollear)
+- [ ] Credential card visible sobre la foto (bottom-right)
+- [ ] Badge +16 visible sobre la foto (top-left)
+- [ ] Headline se revela línea por línea con efecto "sube desde abajo"
+- [ ] CTAs en columna (no en fila)
+- [ ] Fondo crema #F5EBDC, sin fondo oscuro
+- [ ] Trust items aparecen en stagger
+
+- [ ] **Step 3: Verificar desktop (1280px)**
+
+Cambiar a 1280px en DevTools o abrir en ventana completa.
+
+Checklist desktop:
+- [ ] Grid 2 columnas — texto izquierda, foto derecha
+- [ ] Foto con rounded-l-[2.5rem] y gap de 6px en top/right/bottom
+- [ ] Credential card bottom-left sobre la foto
+- [ ] Badge +16 top-right sobre la foto
+- [ ] Headline kinetic igual que mobile
+- [ ] CTAs en fila (no en columna)
+- [ ] Al hacer scroll, la foto sube levemente (parallax)
+
+- [ ] **Step 4: Verificar animación de entrada**
+
+Recargar la página con throttling "Fast 3G" en DevTools para ver el stagger en slow motion.
+
+Orden esperado: eyebrow → foto → línea 1 H1 → línea 2 H1 → subcopy → CTAs → trust items → cards.
+
+---
+
+### Task 3: Commit y push a GitHub
+
+**Files:**
+- Commit: `src/components/sections/Hero.tsx`, `docs/superpowers/`
+
+- [ ] **Step 1: Verificar estado git**
+
+```bash
+cd /c/Users/danie/OneDrive/Escritorio/WEBS/exilus/v2-hero-fullbleed
+git status
+```
+
+Esperado: Hero.tsx modified, docs/ untracked.
+
+- [ ] **Step 2: Stage y commit**
+
+```bash
+git add src/components/sections/Hero.tsx docs/
+git commit -m "redesign: hero cream split editorial — mobile-first
+
+- Swap fullbleed dark overlay for cream split layout (55/45 desktop)
+- Mobile: doctor photo 50vh top with credential card + badge overlay
+- Kinetic H1 reveal: each line slides up from overflow-hidden mask
+- Explicit delay chain: eyebrow→photo→H1 lines→subcopy→CTAs→trust→cards
+- Parallax on desktop photo column (y: 0→-40px on scroll)
+- Remove hidden sm:block — all trust elements visible on mobile
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+```
+
+- [ ] **Step 3: Push a GitHub (auto-deploy Vercel)**
+
+```bash
+git push origin master
+```
+
+Esperado: push exitoso. Vercel detecta el push y despliega automáticamente.
+
+- [ ] **Step 4: Confirmar deploy en Vercel**
+
+En https://vercel.com/dashboard buscar el proyecto `exilus-v2`. Esperar que el deploy muestre "Ready". Abrir la URL de producción y repetir el checklist mobile del Task 2 Step 2.
+
+---
+
+## Self-Review
+
+**Spec coverage:**
+- ✅ Mobile: foto al tope h-[50vh] con rounded-b-3xl
+- ✅ Credential card visible en mobile como overlay (no hidden sm:block)
+- ✅ Badge +16 visible en mobile
+- ✅ H1 revealByLine con overflow-hidden wrapper
+- ✅ Delays exactos según spec (0.05, 0.10, 0.20, 0.32, 0.44, 0.56, 0.68, 0.80, 0.86)
+- ✅ Imagen cambiada a doctor-terno.jpg
+- ✅ Desktop 55/45 grid con rounded-l-[2.5rem] my-6 mr-6
+- ✅ Parallax desktop (y: 0 → -40px)
+- ✅ Fondo crema sin dark overlay
+
+**Placeholders:** Ninguno. Todo el código está completo.
+
+**Type consistency:** `EASE_OUT_EXPO` exportado desde design-system.ts línea 9. `scaleOnHover` exportado desde design-system.ts línea 84. `CLIENT.booking` y `CLIENT.whatsapp` en client-data.ts.
