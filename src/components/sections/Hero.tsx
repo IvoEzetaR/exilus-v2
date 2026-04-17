@@ -1,266 +1,357 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Calendar, MessageCircle, MapPin, Award, Sparkles } from "lucide-react";
-import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Calendar, MessageCircle, MapPin, ChevronDown } from "lucide-react";
 import { CLIENT } from "@/lib/client-data";
-import { scaleOnHover, EASE_OUT_EXPO } from "@/lib/design-system";
+import { EASE_OUT_EXPO } from "@/lib/design-system";
+
+// ─── Animation variants ──────────────────────────────────────────────────────
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.13, delayChildren: 0.15 },
+  },
+};
+
+const itemFade = {
+  hidden: { opacity: 0, y: 22 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.75, ease: EASE_OUT_EXPO } },
+};
+
+const lineReveal = {
+  hidden: { y: "105%" },
+  show: { y: 0, transition: { duration: 0.75, ease: EASE_OUT_EXPO } },
+};
+
+const credentialSlide = {
+  hidden: { opacity: 0, x: 24 },
+  show: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.7, delay: 1.1, ease: EASE_OUT_EXPO },
+  },
+};
+
+const scrollHintAnim = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { duration: 0.6, delay: 1.5, ease: EASE_OUT_EXPO },
+  },
+};
+
+// ─── Component ──────────────────────────────────────────────────────────────
 
 export default function Hero() {
+  const shouldReduce = useReducedMotion();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+
+  // Pause video when user prefers reduced motion
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    if (shouldReduce) {
+      el.pause();
+    } else {
+      el.play().catch(() => {
+        // Autoplay blocked — still display fallback background
+      });
+    }
+  }, [shouldReduce]);
+
+  const motionProps = shouldReduce
+    ? { initial: "show", animate: "show" }
+    : { initial: "hidden", animate: "show" };
+
   return (
     <section
       id="inicio"
       aria-label="Sección principal"
-      className="bg-cream"
+      className="relative min-h-screen flex flex-col overflow-hidden"
+      // Fallback background: solid wine in case video never loads
+      style={{ backgroundColor: "#6C1D45" }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 lg:pt-28 pb-12 lg:pb-20">
+      {/* ── Video full-bleed background ─────────────────────────────────── */}
+      <video
+        ref={videoRef}
+        aria-hidden="true"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        onCanPlay={() => setVideoLoaded(true)}
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{
+          opacity: videoLoaded ? 1 : 0,
+          transition: "opacity 0.8s ease",
+        }}
+      >
+        <source
+          src="https://res.cloudinary.com/dd0hiqfsf/video/upload/q_auto/f_auto/v1776436288/WhatsApp_Video_2026-04-17_at_9.31.00_AM_i6xapq.mp4"
+          type="video/mp4"
+        />
+      </video>
 
-        {/* Eyebrow pill */}
+      {/* ── Multi-layer overlay for legibility ──────────────────────────── */}
+      {/* Bottom-to-top gradient in wine — text area is darker at bottom */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(108,29,69,0.55) 0%, rgba(108,29,69,0.35) 35%, rgba(108,29,69,0.50) 65%, rgba(108,29,69,0.82) 100%)",
+        }}
+      />
+      {/* Additional dark vignette at top-left where headline lives */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 60% at 30% 55%, rgba(30,5,18,0.28) 0%, transparent 70%)",
+        }}
+      />
+
+      {/* ── Content ─────────────────────────────────────────────────────── */}
+      <div className="relative z-10 flex flex-col min-h-screen px-4 sm:px-6 lg:px-8">
+
+        {/* Spacer for fixed Navbar (h-16 + top-10 = ~96px) */}
+        <div className="h-24 sm:h-28 shrink-0" />
+
+        {/* Main copy — vertically centered in remaining space */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.05, ease: EASE_OUT_EXPO }}
-          className="mb-5 lg:mb-6"
+          variants={container}
+          {...motionProps}
+          className="flex-1 flex flex-col justify-center max-w-7xl w-full mx-auto"
         >
-          <span
-            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[11px] font-semibold tracking-[0.14em] uppercase"
-            style={{
-              backgroundColor: "var(--color-lilac)",
-              color: "var(--color-primary)",
-            }}
+          {/* Eyebrow pill */}
+          <motion.div variants={itemFade} className="mb-6 lg:mb-8">
+            <span
+              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[11px] font-semibold tracking-[0.15em] uppercase backdrop-blur-sm"
+              style={{
+                backgroundColor: "rgba(223,208,241,0.18)",
+                color: "rgba(245,235,220,0.95)",
+                border: "1px solid rgba(245,235,220,0.22)",
+              }}
+            >
+              <MapPin className="h-3 w-3" aria-hidden="true" />
+              Cirugía Bariátrica · Trujillo, Perú
+            </span>
+          </motion.div>
+
+          {/* H1 — kinetic line-by-line reveal */}
+          <h1 className="font-serif text-[2.8rem] sm:text-6xl lg:text-[5.2rem] xl:text-[6rem] font-light leading-[1.02] tracking-tight text-white mb-6 lg:mb-8">
+            <span className="block overflow-hidden">
+              <motion.span
+                variants={shouldReduce ? itemFade : lineReveal}
+                {...motionProps}
+                style={
+                  shouldReduce
+                    ? {}
+                    : {
+                        display: "block",
+                        transition: `transform 0.75s cubic-bezier(${EASE_OUT_EXPO.join(",")}) 0.28s`,
+                      }
+                }
+                className="block"
+              >
+                Transforma tu salud.
+              </motion.span>
+            </span>
+            <span className="block overflow-hidden mt-1">
+              <motion.span
+                variants={shouldReduce ? itemFade : lineReveal}
+                {...motionProps}
+                className="block italic"
+                style={{ color: "rgba(245,235,220,0.85)", transitionDelay: "0.42s" }}
+              >
+                Recupera tu vida.
+              </motion.span>
+            </span>
+          </h1>
+
+          {/* Subcopy */}
+          <motion.p
+            variants={itemFade}
+            className="text-base sm:text-lg lg:text-xl max-w-lg leading-relaxed mb-8 lg:mb-10"
+            style={{ color: "rgba(245,235,220,0.80)" }}
           >
-            <MapPin className="h-3 w-3" aria-hidden="true" />
-            Cirugía Bariátrica · Trujillo, Perú
-          </span>
+            Cirugía bariátrica y laparoscópica avanzada con un enfoque integral,
+            seguro y personalizado. Pionero en el norte del Perú con +10 años de
+            experiencia en cirugía metabólica.
+          </motion.p>
+
+          {/* CTA pair */}
+          <motion.div
+            variants={itemFade}
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4"
+          >
+            {/* Primary — green glow */}
+            <motion.a
+              href={CLIENT.booking}
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={
+                shouldReduce
+                  ? {}
+                  : {
+                      scale: 1.04,
+                      boxShadow: "0 0 36px rgba(120,214,75,0.50), 0 0 72px rgba(120,214,75,0.22)",
+                    }
+              }
+              whileTap={shouldReduce ? {} : { scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl px-7 py-4 text-sm font-semibold"
+              style={{
+                backgroundColor: "var(--color-cta)",
+                color: "#1a3a0a",
+                boxShadow: "0 8px 24px rgba(120,214,75,0.30)",
+              }}
+            >
+              {/* Shine sweep on hover */}
+              <span
+                aria-hidden
+                className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full"
+              />
+              <Calendar className="relative z-10 h-4 w-4" aria-hidden="true" />
+              <span className="relative z-10">Agenda tu evaluación</span>
+            </motion.a>
+
+            {/* Secondary — outline cream with text swap */}
+            <motion.a
+              href={CLIENT.whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={shouldReduce ? {} : { scale: 1.03 }}
+              whileTap={shouldReduce ? {} : { scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              className="group relative inline-flex h-[54px] items-center justify-center gap-2 overflow-hidden rounded-xl px-7 text-sm font-semibold backdrop-blur-sm"
+              style={{
+                border: "1.5px solid rgba(245,235,220,0.55)",
+                color: "rgba(245,235,220,0.95)",
+                backgroundColor: "rgba(245,235,220,0.08)",
+              }}
+            >
+              <span className="relative flex items-center gap-2 h-full overflow-hidden">
+                {/* Text swap — two spans stacked */}
+                <span className="flex items-center gap-2 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-full">
+                  <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                  WhatsApp
+                </span>
+                <span className="absolute inset-0 flex items-center gap-2 translate-y-full transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0">
+                  <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                  Consultar ahora →
+                </span>
+              </span>
+            </motion.a>
+          </motion.div>
         </motion.div>
 
-        {/* BENTO GRID — 12 cols, 3 rows en desktop */}
-        <div className="grid grid-cols-12 gap-3 sm:gap-4">
-
-          {/* Tile 1 — H1 hero card (cream deep, cols 1-8, row 1) */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1, ease: EASE_OUT_EXPO }}
-            className="col-span-12 lg:col-span-8 lg:col-start-1 lg:row-start-1 rounded-3xl p-7 sm:p-10 lg:p-12 relative overflow-hidden"
-            style={{ backgroundColor: "#FDF7F0" }}
+        {/* ── Stats bar — bottom strip above scroll hint ─────────────────── */}
+        <motion.div
+          variants={itemFade}
+          {...motionProps}
+          className="max-w-7xl w-full mx-auto pb-20 sm:pb-24"
+        >
+          <div
+            className="inline-flex flex-wrap gap-x-8 gap-y-3 rounded-2xl px-6 py-4 backdrop-blur-sm"
+            style={{
+              backgroundColor: "rgba(108,29,69,0.45)",
+              border: "1px solid rgba(245,235,220,0.15)",
+            }}
           >
-            {/* Decorative corner accent */}
-            <div
-              className="absolute -top-12 -right-12 h-40 w-40 rounded-full opacity-25 blur-2xl"
-              style={{ backgroundColor: "var(--color-lilac)" }}
-              aria-hidden="true"
-            />
-
-            <h1
-              className="relative font-serif text-[2.6rem] sm:text-6xl lg:text-[4.4rem] xl:text-[5rem] font-light leading-[1.02] tracking-tight"
-              style={{ color: "var(--color-primary)" }}
-            >
-              <span className="block overflow-hidden">
-                <motion.span
-                  initial={{ y: "100%" }}
-                  animate={{ y: 0 }}
-                  transition={{ duration: 0.7, delay: 0.28, ease: EASE_OUT_EXPO }}
-                  className="block"
-                >
-                  Transforma tu salud.
-                </motion.span>
-              </span>
-              <span className="block overflow-hidden mt-1">
-                <motion.span
-                  initial={{ y: "100%" }}
-                  animate={{ y: 0 }}
-                  transition={{ duration: 0.7, delay: 0.42, ease: EASE_OUT_EXPO }}
-                  className="block italic"
-                  style={{ color: "var(--color-accent)" }}
-                >
-                  Recupera tu vida.
-                </motion.span>
-              </span>
-            </h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6, ease: EASE_OUT_EXPO }}
-              className="relative mt-6 lg:mt-8 text-base lg:text-lg max-w-md leading-relaxed"
-              style={{ color: "var(--color-warm-text)" }}
-            >
-              Cirugía bariátrica y laparoscópica avanzada con un enfoque
-              integral, seguro y personalizado.
-            </motion.p>
-          </motion.div>
-
-          {/* Tile 2 — Photo (wine bg, cols 9-12, row-span 3) */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.22, ease: EASE_OUT_EXPO }}
-            className="col-span-12 lg:col-span-4 lg:col-start-9 lg:row-start-1 lg:row-span-3 rounded-3xl overflow-hidden relative min-h-[380px] sm:min-h-[440px] lg:min-h-[640px]"
-            style={{ backgroundColor: "var(--color-primary)" }}
-          >
-            <Image
-              src="/images/doctor-terno.jpg"
-              alt="Dr. Víctor Augusto Salazar Tantaleán, cirujano bariatra en Trujillo"
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 33vw"
-              className="object-cover object-top"
-              quality={90}
-            />
-
-            {/* Wine gradient para legibilidad de credential */}
-            <div
-              className="absolute inset-x-0 bottom-0 h-2/5 pointer-events-none"
-              style={{
-                background:
-                  "linear-gradient(to top, rgba(108,29,69,0.92) 0%, rgba(108,29,69,0.55) 40%, transparent 100%)",
-              }}
-              aria-hidden="true"
-            />
-
-            {/* Credential overlay */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.85, ease: EASE_OUT_EXPO }}
-              className="absolute bottom-5 left-5 right-5 z-10"
-            >
-              <div
-                className="inline-flex items-center gap-2 rounded-full px-3 py-1 mb-3"
-                style={{ backgroundColor: "rgba(245,235,220,0.18)", backdropFilter: "blur(6px)" }}
-              >
+            {[
+              { stat: "+16", label: "años en cirugía\nabdominal" },
+              { stat: "+10", label: "años en cirugía\nbariátrica" },
+              { stat: "24h", label: "respuesta a tu\nconsulta" },
+            ].map(({ stat, label }) => (
+              <div key={stat} className="flex items-center gap-3">
                 <span
-                  className="h-1.5 w-1.5 rounded-full"
-                  style={{ backgroundColor: "var(--color-cta)" }}
-                  aria-hidden="true"
-                />
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-white/90">
-                  Disponible · Consulta 24h
+                  className="font-serif text-3xl font-light leading-none"
+                  style={{ color: "var(--color-cta)" }}
+                >
+                  {stat}
+                </span>
+                <span
+                  className="text-[11px] font-medium leading-snug whitespace-pre-line"
+                  style={{ color: "rgba(245,235,220,0.75)" }}
+                >
+                  {label}
                 </span>
               </div>
-              <p className="text-white font-bold text-base leading-tight">
-                Dr. Víctor A. Salazar T.
-              </p>
-              <p className="text-white/80 text-xs mt-0.5 leading-snug">
-                Cirujano Bariatra · Director HRDT
-                <br />
-                Clínica Sanna Sánchez Ferrer
-              </p>
-            </motion.div>
-          </motion.div>
+            ))}
+          </div>
+        </motion.div>
 
-          {/* Tile 3 — Stat +16 años (lilac, cols 1-4, row 2) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4, ease: EASE_OUT_EXPO }}
-            className="col-span-6 lg:col-span-4 lg:col-start-1 lg:row-start-2 rounded-3xl p-6 lg:p-8 flex flex-col justify-between min-h-[180px] lg:min-h-[220px]"
-            style={{ backgroundColor: "var(--color-lilac)" }}
+        {/* Spacer bottom */}
+        <div className="h-0 shrink-0" />
+      </div>
+
+      {/* ── Credential badge — bottom right ─────────────────────────────── */}
+      <motion.div
+        variants={credentialSlide}
+        {...motionProps}
+        className="absolute bottom-16 right-4 sm:right-8 z-20 max-w-[220px] sm:max-w-[240px]"
+      >
+        <div
+          className="rounded-2xl p-4 backdrop-blur-md"
+          style={{
+            backgroundColor: "rgba(108,29,69,0.70)",
+            border: "1px solid rgba(245,235,220,0.22)",
+          }}
+        >
+          <div
+            className="mb-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1"
+            style={{ backgroundColor: "rgba(120,214,75,0.18)" }}
           >
-            <Award
-              className="h-6 w-6"
-              style={{ color: "var(--color-primary)" }}
+            <span
+              className="h-1.5 w-1.5 rounded-full animate-pulse"
+              style={{ backgroundColor: "var(--color-cta)" }}
               aria-hidden="true"
             />
-            <div>
-              <p
-                className="font-serif text-5xl sm:text-6xl lg:text-[4.5rem] font-light leading-none tracking-tight"
-                style={{ color: "var(--color-primary)" }}
-              >
-                +16
-              </p>
-              <p
-                className="mt-2 text-xs sm:text-sm font-medium leading-snug"
-                style={{ color: "var(--color-primary-dark)" }}
-              >
-                años en cirugía
-                <br />
-                abdominal avanzada
-              </p>
-            </div>
-          </motion.div>
-
-          {/* Tile 4 — Pioneer card (wine/vino, cols 5-8, row 2) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.52, ease: EASE_OUT_EXPO }}
-            className="col-span-6 lg:col-span-4 lg:col-start-5 lg:row-start-2 rounded-3xl p-6 lg:p-8 flex flex-col justify-between min-h-[180px] lg:min-h-[220px] relative overflow-hidden"
-            style={{ backgroundColor: "var(--color-primary)" }}
+            <span
+              className="text-[10px] font-semibold uppercase tracking-wider"
+              style={{ color: "var(--color-cta)" }}
+            >
+              Disponible · Consulta 24h
+            </span>
+          </div>
+          <p className="text-white font-bold text-sm leading-tight">
+            Dr. Víctor A. Salazar T.
+          </p>
+          <p
+            className="text-xs mt-0.5 leading-snug"
+            style={{ color: "rgba(245,235,220,0.75)" }}
           >
-            <Sparkles className="h-6 w-6 text-white/90" aria-hidden="true" />
-            <div>
-              <p className="font-serif text-3xl sm:text-4xl lg:text-[2.5rem] font-light leading-[1.05] tracking-tight text-white">
-                Pionero
-                <span className="block italic text-white/70 text-xl sm:text-2xl lg:text-[1.5rem] mt-1">
-                  en el norte del Perú
-                </span>
-              </p>
-              <p className="mt-3 text-xs sm:text-sm text-white/70 leading-snug">
-                10 años en cirugía bariátrica y metabólica
-              </p>
-            </div>
-          </motion.div>
-
-          {/* Tile 5 — CTA card (green, cols 1-8, row 3) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.64, ease: EASE_OUT_EXPO }}
-            className="col-span-12 lg:col-span-8 lg:col-start-1 lg:row-start-3 rounded-3xl p-6 lg:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5"
-            style={{ backgroundColor: "var(--color-cta)" }}
-          >
-            <div className="flex-1">
-              <p
-                className="font-serif text-2xl lg:text-3xl font-normal leading-tight"
-                style={{ color: "#0f2e07" }}
-              >
-                Agenda tu evaluación
-              </p>
-              <p
-                className="mt-1.5 text-sm font-medium"
-                style={{ color: "#1a4a0a" }}
-              >
-                Presencial en Trujillo o virtual · Respuesta en menos de 24h
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-              <motion.a
-                href={CLIENT.booking}
-                target="_blank"
-                rel="noopener noreferrer"
-                {...scaleOnHover}
-                className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold"
-                style={{
-                  backgroundColor: "var(--color-primary)",
-                  color: "white",
-                  boxShadow: "0 8px 20px rgba(108,29,69,0.25)",
-                }}
-              >
-                <Calendar className="h-4 w-4" aria-hidden="true" />
-                Reservar ahora
-              </motion.a>
-              <motion.a
-                href={CLIENT.whatsapp}
-                target="_blank"
-                rel="noopener noreferrer"
-                {...scaleOnHover}
-                className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold border-2"
-                style={{
-                  borderColor: "var(--color-primary)",
-                  color: "var(--color-primary)",
-                  backgroundColor: "transparent",
-                }}
-              >
-                <MessageCircle className="h-4 w-4" aria-hidden="true" />
-                WhatsApp
-              </motion.a>
-            </div>
-          </motion.div>
-
+            Cirujano Bariatra · Director HRDT
+            <br />
+            Clínica Sanna Sánchez Ferrer
+          </p>
         </div>
-      </div>
+      </motion.div>
+
+      {/* ── Scroll hint ─────────────────────────────────────────────────── */}
+      <motion.div
+        variants={scrollHintAnim}
+        initial="hidden"
+        animate="show"
+        aria-hidden="true"
+        className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1"
+        style={{ color: "rgba(245,235,220,0.45)" }}
+      >
+        <span className="text-[10px] font-medium uppercase tracking-widest">
+          Scroll
+        </span>
+        <ChevronDown
+          className="h-4 w-4 animate-bounce"
+          aria-hidden="true"
+        />
+      </motion.div>
     </section>
   );
 }
